@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ahmed Veg. Oil Order Booking</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            text-align: center;
+            color: #333;
+        }
+        .header-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            flex-wrap: wrap;
+        }
+        .header-info div {
+            flex: 1;
+            min-width: 200px;
+            margin: 0 10px 10px 0;
+        }
+        input[type="text"], input[type="datetime-local"], select, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            position: sticky;
+            top: 0;
+        }
+        input[type="number"] {
+            width: 80px;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .total-row {
+            font-weight: bold;
+            background-color: #f2f2f2;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .whatsapp-btn {
+            background-color: #25D366;
+        }
+        .whatsapp-btn:hover {
+            background-color: #1da851;
+        }
+        .hidden {
+            display: none;
+        }
+        .add-item-btn {
+            background-color: #2196F3;
+            margin-bottom: 20px;
+        }
+        .add-item-btn:hover {
+            background-color: #0b7dda;
+        }
+        .remove-btn {
+            background-color: #f44336;
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+        .remove-btn:hover {
+            background-color: #d32f2f;
+        }
+        .payment-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        .discount-info {
+            color: #4CAF50;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        .summary-section {
+            background-color: #f0f8ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .tab-container {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 10px 20px;
+            background-color: #ddd;
+            cursor: pointer;
+            margin-right: 5px;
+            border-radius: 5px 5px 0 0;
+        }
+        .tab.active {
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .order-list {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+        .order-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+        .order-item:hover {
+            background-color: #f5f5f5;
+        }
+        .order-item.selected {
+            background-color: #e0f7fa;
+        }
+        .delivery-form {
+            background-color: #fff8e1;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status-booked {
+            background-color: #ffecb3;
+            color: #ff8f00;
+        }
+        .status-delivered {
+            background-color: #c8e6c9;
+            color: #2e7d32;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Faizan Karyana Store</h1>
+        <h2>Booking for Shahbaz - Ahmed Ghee</h2>
+        <div class="tab-container">
+            <div class="tab active" data-tab="booking">Booking</div>
+            <div class="tab" data-tab="orders">Order Management</div>
+            <div class="tab" data-tab="delivery">Delivery</div>
+        </div>
+        
+        <!-- Booking Tab -->
+        <div id="booking-tab" class="tab-content active">
+            <div class="header-info">
+                <div>
+                    <label for="retailerName">Retailer Name:</label>
+                    <input type="text" id="retailerName" placeholder="Enter retailer name">
+                </div>
+                <div>
+                    <label for="orderDate">Date & Time:</label>
+                    <input type="datetime-local" id="orderDate">
+                </div>
+                <div class="payment-section">
+                    <label for="paymentMode">Payment Mode:</label>
+                    <select id="paymentMode">
+                        <option value="credit">Credit</option>
+                        <option value="cash">Cash</option>
+                    </select>
+                    <div id="discountMessage" class="discount-info hidden">1% cash discount (always) + 0.5% wholesale discount if order ≥ 1000KG</div>
+                </div>
+            </div>
+            
+            <div class="summary-section">
+                <div><strong>Order Summary:</strong></div>
+                <div>Total Weight: <span id="summaryWeight">0</span> KG</div>
+                <div>Subtotal: Rs. <span id="summarySubtotal">0</span></div>
+                <div id="summaryDiscountContainer" class="hidden">
+                    Cash Discount (1%): -Rs. <span id="summaryDiscount">0</span>
+                </div>
+                <div><strong>Grand Total: Rs. <span id="summaryGrandTotal">0</span></strong></div>
+            </div>
+            
+            <div class="item-selection">
+                <label for="productSelect">Select Product:</label>
+                <select id="productSelect">
+                    <option value="">-- Select a product --</option>
+                    <!-- Options will be populated by JavaScript -->
+                </select>
+                <button id="addItemBtn" class="add-item-btn">Add Item to Order</button>
+            </div>
+            
+            <table id="orderTable">
+                <thead>
+                    <tr>
+                        <th>Item Name</th>
+                        <th>Ordered Quantity</th>
+                        <th class="hidden">Weight per piece</th>
+                        <th>Total Weight</th>
+                        <th>Rate per piece/pack</th>
+                        <th>Total Amount</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Items will be added dynamically -->
+                </tbody>
+            </table>
+            
+            <div class="action-buttons">
+                <button id="saveOrderBtn">Save Order</button>
+                <button id="clearFormBtn">Clear Form</button>
+                <button id="generateInvoiceBtn" class="whatsapp-btn">Generate Invoice</button>
+            </div>
+        </div>
+        
+        <!-- Orders Management Tab -->
+        <div id="orders-tab" class="tab-content">
+            <h2>Order Management</h2>
+            <div>
+                <label for="orderFilterDate">Filter by Date:</label>
+                <input type="date" id="orderFilterDate">
+                <button id="filterOrdersBtn">Filter</button>
+                <button id="clearFilterBtn">Clear Filter</button>
+                <button id="downloadAllBtn" class="whatsapp-btn">Download All Invoices</button>
+                <button id="generateSummaryBtn">Generate Summary Report</button>
+
+            </div>
+            
+            <div class="order-list" id="orderList">
+                <!-- Orders will be populated here -->
+            </div>
+        </div>
+        
+        <!-- Delivery Tab -->
+        <div id="delivery-tab" class="tab-content">
+            <h2>Delivery Management</h2>
+            <div>
+                <label for="deliveryOrderSelect">Select Order:</label>
+                <select id="deliveryOrderSelect">
+                    <option value="">-- Select an order --</option>
+                </select>
+            </div>
+            
+            <div id="deliveryFormContainer" class="delivery-form hidden">
+                <h3>Delivery Details</h3>
+                <div>
+                    <label for="deliveryDate">Delivery Date:</label>
+                    <input type="datetime-local" id="deliveryDate">
+                </div>
+                <div>
+                    <label for="deliveryPerson">Delivery Person:</label>
+                    <input type="text" id="deliveryPerson" placeholder="Enter delivery person name">
+                </div>
+                <div>
+                    <label for="deliveryVehicle">Vehicle Number:</label>
+                    <input type="text" id="deliveryVehicle" placeholder="Enter vehicle number">
+                </div>
+                <div>
+                    <label for="deliveryNotes">Notes:</label>
+                    <textarea id="deliveryNotes" rows="3" placeholder="Any delivery notes"></textarea>
+                </div>
+                
+                <div class="action-buttons">
+                    <button id="saveDeliveryBtn">Save Delivery</button>
+                    <button id="printDeliveryBtn">Print Delivery Note</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize products data
+        const products = [
+            { name: "Shahbaz Banaspati 5KG Tin", weight: 5, rate: 2630 },
+            { name: "Shahbaz Banaspati 5KG Bucket", weight: 5, rate: 2630 },
+            { name: "Shahbaz Banaspati 2.5KG Tin", weight: 2.5, rate: 1328 },
+            { name: "Shahbaz Banaspati 2.5KG Bucket", weight: 2.5, rate: 1328 },
+            { name: "Shahbaz Banaspati 1x5", weight: 5, rate: 2512 },
+            { name: "Shahbaz 10KG Bucket", weight: 10, rate: 5197 },
+            { name: "Shahbaz 16KG Tin", weight: 16, rate: 8193 },
+            { name: "Shahbaz 16KG Bucket", weight: 16, rate: 8193 },
+            { name: "RITE C/O 3LTR 1x6 CTN", weight: 16.2, rate: 9390 },
+            { name: "RITE C/O 5LTR 1x4 CTN", weight: 18, rate: 10344 },
+            { name: "Shahbaz Cooking Oil 1x5", weight: 4.5, rate: 2526 },
+            { name: "Shahbaz 16LTR Tin", weight: 14.4, rate: 8214 },
+            { name: "Shahbaz Sarson Oil 250ML", weight: 6, rate: 3050 },
+            { name: "Shahbaz Sarson Oil 500ML", weight: 6, rate: 3050 },
+            { name: "Kaptaan 12KG 24x500GM", weight: 12, rate: 5260 },
+            { name: "Shahbaz Cooking Oil 10LTR CTN", weight: 18, rate: 5204 },
+            { name: "Shahbaz Washing Soap 240GMSx36 loose pack", weight: 10.8, rate: 2350 },
+            { name: "Mumtaz Banaspati 2.25", weight: 2.25, rate: 1195 },
+            { name: "Mumtaz Banaspati 4.5", weight: 4.5, rate: 2368 },
+            { name: "Shahbaz C/O 5LTR Tin", weight: 4.5, rate: 2616 },
+            { name: "Shahbaz C/O 2.5LTR Tin", weight: 2.25, rate: 1303 },
+            { name: "Shahbaz C/O 1x5 Stand-Up Pouch", weight: 4.5, rate: 2640 },
+            { name: "Shahbaz Washing Soap 250GMSx40 4Pack", weight: 10, rate: 2700 },
+            { name: "Shahbaz Banaspati 500GMSx24", weight: 12, rate: 6027 },
+            { name: "Shahbaz Banaspati 250GMSx48", weight: 12, rate: 6027 }
+        ];
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set current date and time
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            
+            document.getElementById('orderDate').value = `${year}-${month}-${day}T${hours}:${minutes}`;
+            document.getElementById('deliveryDate').value = `${year}-${month}-${day}T${hours}:${minutes}`;
+            document.getElementById('orderFilterDate').value = `${year}-${month}-${day}`;
+            
+            // Populate product dropdown
+            const productSelect = document.getElementById('productSelect');
+            products.forEach(product => {
+                const option = document.createElement('option');
+                option.value = product.name;
+                option.textContent = product.name;
+                productSelect.appendChild(option);
+            });
+            
+            // Tab switching
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    
+                    this.classList.add('active');
+                    document.getElementById(`${this.dataset.tab}-tab`).classList.add('active');
+                    
+                    if (this.dataset.tab === 'orders') {
+                        loadOrders();
+                    } else if (this.dataset.tab === 'delivery') {
+                        loadOrdersForDelivery();
+                    }
+                });
+            });
+            
+            // Add item button event listener
+            document.getElementById('addItemBtn').addEventListener('click', addSelectedItem);
+            
+            // Save order button
+            document.getElementById('saveOrderBtn').addEventListener('click', saveOrder);
+            
+            // Clear form button
+            document.getElementById('clearFormBtn').addEventListener('click', clearForm);
+            
+            // Generate invoice button
+            document.getElementById('generateInvoiceBtn').addEventListener('click', generateInvoice);
+            
+            // Filter orders button
+            document.getElementById('filterOrdersBtn').addEventListener('click', loadOrders);
+            
+            // Clear filter button
+            document.getElementById('clearFilterBtn').addEventListener('click', function() {
+                document.getElementById('orderFilterDate').value = '';
+                loadOrders();
+            });
+            
+            // Download all invoices button
+            document.getElementById('downloadAllBtn').addEventListener('click', downloadAllInvoices);
+            
+            // Order selection for delivery
+            document.getElementById('deliveryOrderSelect').addEventListener('change', function() {
+                const orderId = this.value;
+                if (orderId) {
+                    const order = getOrderById(orderId);
+                    document.getElementById('deliveryFormContainer').classList.remove('hidden');
+                } else {
+                    document.getElementById('deliveryFormContainer').classList.add('hidden');
+                }
+            });
+            
+            // Save delivery button
+            document.getElementById('saveDeliveryBtn').addEventListener('click', saveDelivery);
+            
+            // Print delivery note button
+            document.getElementById('printDeliveryBtn').addEventListener('click', printDeliveryNote);
+            
+            // Initialize table event delegation
+            document.querySelector('#orderTable tbody').addEventListener('input', function(e) {
+                if (e.target.classList.contains('quantity') || e.target.classList.contains('rate')) {
+                    updateRow(e.target.closest('tr'));
+                    updateTotals();
+                }
+            });
+            
+            // Initialize remove button event delegation
+            document.querySelector('#orderTable tbody').addEventListener('click', function(e) {
+                if (e.target.classList.contains('remove-btn')) {
+                    e.target.closest('tr').remove();
+                    updateTotals();
+                }
+            });
+            
+            // Payment mode change listener
+            document.getElementById('paymentMode').addEventListener('change', updateTotals);
+        });
+
+        function addSelectedItem() {
+            const productSelect = document.getElementById('productSelect');
+            const selectedProductName = productSelect.value;
+            
+            if (!selectedProductName) return;
+            
+            // Check if product already exists in table
+            const existingRow = Array.from(document.querySelectorAll('#orderTable tbody tr'))
+                .find(row => row.cells[0].textContent === selectedProductName);
+            
+            if (existingRow) {
+                // If exists, just increment quantity
+                const quantityInput = existingRow.querySelector('.quantity');
+                quantityInput.value = parseInt(quantityInput.value) + 1;
+                updateRow(existingRow);
+            } else {
+                // If new, add new row
+                const product = products.find(p => p.name === selectedProductName);
+                const tbody = document.querySelector('#orderTable tbody');
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${product.name}</td>
+                    <td><input type="number" min="1" value="1" class="quantity" data-weight="${product.weight}" data-rate="${product.rate}"></td>
+                    <td class="hidden">${product.weight}</td>
+                    <td class="item-weight">${product.weight}</td>
+                    <td><input type="number" min="0" value="${product.rate}" class="rate"></td>
+                    <td class="item-amount">${product.rate}</td>
+                    <td><button class="remove-btn">Remove</button></td>
+                `;
+                
+                tbody.appendChild(row);
+            }
+            
+            updateTotals();
+            productSelect.value = ''; // Reset selection
+        }
+
+        function updateRow(row) {
+            const quantityInput = row.querySelector('.quantity');
+            const rateInput = row.querySelector('.rate');
+            const weightCell = row.querySelector('.item-weight');
+            const amountCell = row.querySelector('.item-amount');
+            
+            const quantity = parseFloat(quantityInput.value) || 0;
+            const rate = parseFloat(rateInput.value) || 0;
+            const weightPerPiece = parseFloat(quantityInput.dataset.weight);
+            
+            const totalWeight = quantity * weightPerPiece;
+            const totalAmount = quantity * rate;
+            
+            weightCell.textContent = totalWeight.toFixed(2);
+            amountCell.textContent = totalAmount.toFixed(2);
+        }
+
+        function updateTotals() {
+            const weightCells = document.querySelectorAll('.item-weight');
+            const amountCells = document.querySelectorAll('.item-amount');
+            
+            let totalWeight = 0;
+            let subtotal = 0;
+            
+            weightCells.forEach(cell => {
+                totalWeight += parseFloat(cell.textContent) || 0;
+            });
+            
+            amountCells.forEach(cell => {
+                subtotal += parseFloat(cell.textContent) || 0;
+            });
+            
+            // Update summary display
+            document.getElementById('summaryWeight').textContent = totalWeight.toFixed(2);
+            document.getElementById('summarySubtotal').textContent = subtotal.toFixed(2);
+            
+            // Calculate discount if payment is cash and weight ≥1000KG
+            const paymentMode = document.getElementById('paymentMode').value;
+            const discountMessage = document.getElementById('discountMessage');
+            const discountContainer = document.getElementById('summaryDiscountContainer');
+            let discount = 0;
+            let grandTotal = subtotal;
+            
+            if (paymentMode === 'cash') {
+    discount = subtotal * 0.01;
+    let wholesaleDiscount = 0;
+
+    if (totalWeight >= 1000) {
+        wholesaleDiscount = subtotal * 0.005;
+    }
+
+    discount = wholesaleDiscount;
+    grandTotal = subtotal - discount;
+
+    discountMessage.textContent = `1% Cash Discount${wholesaleDiscount > 0 ? " + 0.5% Wholesale Discount (over 1000KG)" : ""} applied`;
+    discountMessage.classList.remove('hidden');
+    discountContainer.classList.remove('hidden');
+    document.getElementById('summaryDiscount').textContent = discount.toFixed(2);
+    } else {
+    discountMessage.classList.add('hidden');
+    discountContainer.classList.add('hidden');
+    }
+
+            
+            document.getElementById('summaryGrandTotal').textContent = grandTotal.toFixed(2);
+        }
+
+        function saveOrder() {
+            const retailerName = document.getElementById('retailerName').value;
+            const orderDate = document.getElementById('orderDate').value;
+            const paymentMode = document.getElementById('paymentMode').value;
+            
+            if (!retailerName) {
+                alert('Please enter retailer name');
+                return;
+            }
+            
+            // Collect order items
+            const items = [];
+            document.querySelectorAll('#orderTable tbody tr').forEach(row => {
+                items.push({
+                    name: row.cells[0].textContent,
+                    quantity: row.querySelector('.quantity').value,
+                    rate: row.querySelector('.rate').value,
+                    weight: row.cells[3].textContent,
+                    amount: row.cells[5].textContent
+                });
+            });
+            
+            if (items.length === 0) {
+                alert('Please add at least one item to the order');
+                return;
+            }
+            
+            // Calculate totals
+            const totalWeight = parseFloat(document.getElementById('summaryWeight').textContent) || 0;
+            const subtotal = parseFloat(document.getElementById('summarySubtotal').textContent) || 0;
+            let discount = 0;
+            let grandTotal = subtotal;
+            
+            if (paymentMode === 'cash') {
+    discount = subtotal * 0.01;
+    if (totalWeight >= 1000) {
+        discount += subtotal * 0.005;
+    }
+    grandTotal = subtotal - discount;
+            }
+            
+            // Create order object
+            const order = {
+                id: Date.now().toString(),
+                retailerName,
+                orderDate,
+                paymentMode,
+                items,
+                totals: {
+                    weight: totalWeight,
+                    subtotal,
+                    discount,
+                    grandTotal
+                },
+                status: 'booked',
+                delivery: null
+            };
+            
+            // Save to local storage
+            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+            orders.push(order);
+            localStorage.setItem('orders', JSON.stringify(orders));
+          // Send to Google Sheets for backup
+fetch("https://script.google.com/macros/s/AKfycbw0PWNH-euuWay8C7Yr1GGTQT7dvYnSen4HZwD-SUNErkoXssNinmr5A2XFNjRIZc51_w/exec", {
+  method: "POST",
+  body: JSON.stringify(order),
+  headers: {
+    "Content-Type": "application/json"
+  }
+})
+.then(res => res.text())
+.then(msg => console.log("Google Sheets Backup:", msg))
+.catch(err => console.error("Backup failed:", err));
+
+            
+            alert('Order saved successfully!');
+            clearForm();
+            loadOrders();
+        }
+
+        function clearForm() {
+            document.getElementById('retailerName').value = '';
+            
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            
+            document.getElementById('orderDate').value = `${year}-${month}-${day}T${hours}:${minutes}`;
+            document.getElementById('paymentMode').value = 'credit';
+            
+            document.querySelector('#orderTable tbody').innerHTML = '';
+            
+            document.getElementById('summaryWeight').textContent = '0';
+            document.getElementById('summarySubtotal').textContent = '0';
+            document.getElementById('summaryGrandTotal').textContent = '0';
+            document.getElementById('discountMessage').classList.add('hidden');
+            document.getElementById('summaryDiscountContainer').classList.add('hidden');
+        }
+
+        function loadOrders() {
+            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+            const filterDate = document.getElementById('orderFilterDate').value;
+            
+            let filteredOrders = orders;
+            if (filterDate) {
+                filteredOrders = orders.filter(order => {
+                    const orderDate = new Date(order.orderDate);
+                    const filterDateObj = new Date(filterDate);
+                    return orderDate.toDateString() === filterDateObj.toDateString();
+                });
+            }
+            
+            const orderList = document.getElementById('orderList');
+            orderList.innerHTML = '';
+            
+            if (filteredOrders.length === 0) {
+                orderList.innerHTML = '<div class="order-item">No orders found</div>';
+                return;
+            }
+            
+            filteredOrders.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate)).forEach(order => {
+                const orderItem = document.createElement('div');
+                orderItem.className = 'order-item';
+                orderItem.dataset.orderId = order.id;
+                
+                const date = new Date(order.orderDate);
+                const dateStr = date.toLocaleString();
+                
+                orderItem.innerHTML = `
+                    <div><strong>${order.retailerName}</strong></div>
+                    <div>${dateStr} • Total: Rs. ${order.totals.grandTotal.toFixed(2)}</div>
+                    <div>Weight: ${order.totals.weight.toFixed(2)} KG • Payment: ${order.paymentMode.toUpperCase()}</div>
+                    <div class="status-badge status-${order.status}">${order.status.toUpperCase()}</div>
+                `;
+                
+                orderItem.addEventListener('click', function() {
+                    document.querySelectorAll('.order-item').forEach(item => item.classList.remove('selected'));
+                    this.classList.add('selected');
+                });
+                
+                orderList.appendChild(orderItem);
+            });
+        }
+
+        function loadOrdersForDelivery() {
+            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+            const deliverySelect = document.getElementById('deliveryOrderSelect');
+            
+            deliverySelect.innerHTML = '<option value="">-- Select an order --</option>';
+            
+            const bookedOrders = orders.filter(order => order.status === 'booked');
+            if (bookedOrders.length === 0) {
+                deliverySelect.innerHTML = '<option value="">No orders available for delivery</option>';
+                return;
+            }
+            
+            bookedOrders.sort((a, b) => new Date(a.orderDate) - new Date(b.orderDate)).forEach(order => {
+                const option = document.createElement('option');
+                option.value = order.id;
+                option.textContent = `${order.retailerName} (${new Date(order.orderDate).toLocaleString()}) - Rs. ${order.totals.grandTotal.toFixed(2)}`;
+                deliverySelect.appendChild(option);
+            });
+        }
+
+        function getOrderById(orderId) {
+            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+            return orders.find(order => order.id === orderId);
+        }
+
+        function generateInvoice() {
+            const retailerName = document.getElementById('retailerName').value;
+            if (!retailerName) {
+                alert('Please enter retailer name before generating invoice');
+                return;
+            }
+            
+            saveOrder();
+            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+            const latestOrder = orders[orders.length - 1];
+            
+            generatePDFForOrder(latestOrder);
+        }
+
+        function generatePDFForOrder(order) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Add header
+            doc.setFontSize(16);
+            doc.text('Faizan Karyana Store', 105, 15, { align: 'center' });
+            
+            doc.setFontSize(12);
+            doc.text(`Retailer: ${order.retailerName}`, 14, 25);
+            doc.text(`Date: ${new Date(order.orderDate).toLocaleString()}`, 14, 35);
+            doc.text(`Payment Mode: ${order.paymentMode.toUpperCase()}`, 14, 45);
+            doc.text(`Invoice #: ${order.id}`, 14, 55);
+            
+            // Prepare table data
+            const tableData = order.items.map(item => [
+                item.name,
+                item.quantity,
+                item.weight,
+                item.rate,
+                item.amount
+            ]);
+            
+            // Add order lines
+            doc.autoTable({
+                head: [['Item Name', 'Qty', 'Weight', 'Rate', 'Amount']],
+                body: tableData,
+                startY: 65,
+                styles: {
+                    fontSize: 10,
+                    cellPadding: 3,
+                    overflow: 'linebreak'
+                },
+                columnStyles: {
+                    0: { cellWidth: 'auto' },
+                    1: { cellWidth: 'auto' },
+                    2: { cellWidth: 'auto' },
+                    3: { cellWidth: 'auto' },
+                    4: { cellWidth: 'auto' }
+                },
+                margin: { left: 10, right: 10 }
+            });
+            
+            // Add summary
+let lineY = doc.lastAutoTable.finalY + 10;
+doc.setFontSize(12);
+doc.setFont('helvetica', 'normal');
+
+doc.text(`Total Weight: ${order.totals.weight.toFixed(2)} KG`, 14, lineY);
+lineY += 10;
+
+doc.text(`Subtotal: Rs. ${order.totals.subtotal.toFixed(2)}`, 14, lineY);
+lineY += 10;
+
+if (order.paymentMode === 'cash') {
+    let cashDiscount = order.totals.subtotal * 0.01;
+    let wholesaleDiscount = order.totals.weight >= 1000 ? order.totals.subtotal * 0.005 : 0;
+
+    doc.text(`Cash Discount (1%): -Rs. ${cashDiscount.toFixed(2)}`, 14, lineY);
+    lineY += 10;
+
+    if (wholesaleDiscount > 0) {
+        doc.text(`Wholesale Discount (0.5%): -Rs. ${wholesaleDiscount.toFixed(2)}`, 14, lineY);
+        lineY += 10;
+    }
+}
+
+// Final grand total line
+doc.setFont('helvetica', 'bold');
+doc.text(`Grand Total: Rs. ${order.totals.grandTotal.toFixed(2)}`, 14, lineY);
+lineY += 15;
+
+if (order.paymentMode === 'credit') {
+    doc.setFont('helvetica', 'italic');
+    doc.setTextColor(200, 0, 0); // Red color
+    doc.text("Credit Policy: Maximum 21 days. Please ensure timely payments, otherwise we may not be able to offer further credit. Payments beyond 21 days may result in suspension of future credit facilities.", 14, lineY, { maxWidth: 180 });
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(0, 0, 0); // Reset to black
+}
+
+
+
+            
+            // Save the PDF
+            const fileName = `Invoice_${order.retailerName.replace(/[^a-zA-Z0-9]/g, '_')}_${order.id}.pdf`;
+            doc.save(fileName);
+        }
+
+        function downloadAllInvoices() {
+            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+            const filterDate = document.getElementById('orderFilterDate').value;
+            
+            let filteredOrders = orders;
+            if (filterDate) {
+                filteredOrders = orders.filter(order => {
+                    const orderDate = new Date(order.orderDate);
+                    const filterDateObj = new Date(filterDate);
+                    return orderDate.toDateString() === filterDateObj.toDateString();
+                });
+            }
+            
+            if (filteredOrders.length === 0) {
+                alert('No orders found to download');
+                return;
+            }
+            
+            if (confirm(`Download ${filteredOrders.length} invoice(s)?`)) {
+                filteredOrders.forEach(order => {
+                    generatePDFForOrder(order);
+                });
+            }
+        }
+
+        function saveDelivery() {
+            const orderId = document.getElementById('deliveryOrderSelect').value;
+            if (!orderId) {
+                alert('Please select an order first');
+                return;
+            }
+            
+            const deliveryDate = document.getElementById('deliveryDate').value;
+            const deliveryPerson = document.getElementById('deliveryPerson').value;
+            const deliveryVehicle = document.getElementById('deliveryVehicle').value;
+            const deliveryNotes = document.getElementById('deliveryNotes').value;
+            
+            if (!deliveryPerson) {
+                alert('Please enter delivery person name');
+                return;
+            }
+            
+            // Update order in storage
+            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+            const orderIndex = orders.findIndex(order => order.id === orderId);
+            
+            if (orderIndex === -1) {
+                alert('Order not found');
+                return;
+            }
+            
+            orders[orderIndex].status = 'delivered';
+            orders[orderIndex].delivery = {
+                date: deliveryDate,
+                person: deliveryPerson,
+                vehicle: deliveryVehicle,
+                notes: deliveryNotes
+            };
+            
+            localStorage.setItem('orders', JSON.stringify(orders));
+            
+            alert('Delivery details saved successfully!');
+            document.getElementById('deliveryFormContainer').classList.add('hidden');
+            document.getElementById('deliveryOrderSelect').value = '';
+            loadOrdersForDelivery();
+        }
+
+        function printDeliveryNote() {
+            const orderId = document.getElementById('deliveryOrderSelect').value;
+            if (!orderId) {
+                alert('Please select an order first');
+                return;
+            }
+            
+            const order = getOrderById(orderId);
+            if (!order) {
+                alert('Order not found');
+                return;
+            }
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Add header
+            doc.setFontSize(16);
+            doc.text('DELIVERY NOTE', 105, 15, { align: 'center' });
+            
+            doc.setFontSize(12);
+            doc.text(`Retailer: ${order.retailerName}`, 14, 25);
+            doc.text(`Order Date: ${new Date(order.orderDate).toLocaleString()}`, 14, 35);
+            doc.text(`Invoice #: ${order.id}`, 14, 45);
+            
+            // Delivery details
+            const deliveryDate = document.getElementById('deliveryDate').value || 'Not specified';
+            const deliveryPerson = document.getElementById('deliveryPerson').value || 'Not specified';
+            const deliveryVehicle = document.getElementById('deliveryVehicle').value || 'Not specified';
+            const deliveryNotes = document.getElementById('deliveryNotes').value || 'No notes';
+            
+            doc.text(`Delivery Date: ${deliveryDate}`, 14, 55);
+            doc.text(`Delivery Person: ${deliveryPerson}`, 14, 65);
+            doc.text(`Vehicle Number: ${deliveryVehicle}`, 14, 75);
+            
+            // Prepare table data
+            const tableData = order.items.map(item => [
+                item.name,
+                item.quantity,
+                item.weight
+            ]);
+            
+            // Add order lines
+            doc.autoTable({
+                head: [['Item Name', 'Qty', 'Weight']],
+                body: tableData,
+                startY: 85,
+                styles: {
+                    fontSize: 10,
+                    cellPadding: 3,
+                    overflow: 'linebreak'
+                },
+                columnStyles: {
+                    0: { cellWidth: 'auto' },
+                    1: { cellWidth: 'auto' },
+                    2: { cellWidth: 'auto' }
+                },
+                margin: { left: 10, right: 10 }
+            });
+            
+            // Add notes
+            const finalY = doc.lastAutoTable.finalY + 10;
+            doc.text('Delivery Notes:', 14, finalY);
+            doc.text(deliveryNotes, 14, finalY + 10);
+            
+            // Add signature line
+            doc.text('Receiver Signature: ________________________', 14, finalY + 30);
+            doc.text('Delivery Person Signature: ________________________', 14, finalY + 40);
+            
+            // Save the PDF
+            const fileName = `Delivery_${order.retailerName.replace(/[^a-zA-Z0-9]/g, '_')}_${order.id}.pdf`;
+            doc.save(fileName);
+        }
+      document.getElementById('generateSummaryBtn').addEventListener('click', function () {
+    const filterDate = document.getElementById('orderFilterDate').value;
+    if (!filterDate) {
+        alert('Please select a date to generate summary.');
+        return;
+    }
+
+    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+
+    // Filter orders by selected date
+    const selectedOrders = orders.filter(order => {
+        const orderDate = new Date(order.orderDate).toISOString().split('T')[0];
+        return orderDate === filterDate;
+    });
+
+    if (selectedOrders.length === 0) {
+        alert('No orders found for selected date.');
+        return;
+    }
+
+    // Collect all unique products
+    const allProducts = new Set();
+    selectedOrders.forEach(order => {
+        order.items.forEach(item => {
+            allProducts.add(item.name);
+        });
+    });
+
+    // Abbreviation helper
+    function abbreviate(name) {
+        return name
+            .split(" ")
+            .map(word => {
+                if (/[\d]+/.test(word)) return word;
+                return word[0].toUpperCase();
+            })
+            .join(" ");
+    }
+
+    const productFullList = Array.from(allProducts).sort();
+    const productNameMap = {};
+    productFullList.forEach(name => {
+        productNameMap[name] = abbreviate(name);
+    });
+
+    // Build summary: retailer -> item -> qty
+    const summary = {};
+    selectedOrders.forEach(order => {
+        const retailer = order.retailerName;
+        if (!summary[retailer]) {
+            summary[retailer] = { products: {}, totalWeight: 0 };
+        }
+        order.items.forEach(item => {
+            const qty = parseFloat(item.quantity) || 0;
+const productInfo = products.find(p => p.name === item.name);
+const unitWeight = productInfo ? productInfo.weight : 0;
+
+summary[retailer].products[item.name] = (summary[retailer].products[item.name] || 0) + qty;
+summary[retailer].totalWeight += qty * unitWeight;
+
+        });
+    });
+
+    // Prepare table rows
+    const headRow = ['Retailer', ...productFullList.map(name => productNameMap[name]), 'Total KGs'];
+    const bodyRows = [];
+
+    for (const retailer in summary) {
+        const row = [retailer];
+        productFullList.forEach(product => {
+            row.push(summary[retailer].products[product] || 0);
+        });
+        row.push(summary[retailer].totalWeight.toFixed(2));
+        bodyRows.push(row);
+    }
+        // ➕ Add grand totals row once
+const totalRow = ['Total'];
+let grandWeight = 0;
+
+productFullList.forEach(product => {
+    let totalQty = 0;
+    for (const retailer in summary) {
+        totalQty += summary[retailer].products[product] || 0;
+    }
+    totalRow.push(totalQty);
+});
+
+for (const retailer in summary) {
+    grandWeight += summary[retailer].totalWeight;
+}
+totalRow.push(grandWeight.toFixed(2));
+
+bodyRows.push(totalRow);  // ✅ Add just once at the end
+
+
+    // Generate PDF
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('l');
+
+    doc.setFontSize(16);
+    doc.text("Daily Order Summary", 148, 15, { align: 'center' });
+
+    doc.setFontSize(12);
+    doc.text(`Date: ${filterDate}`, 14, 25);
+
+    doc.autoTable({
+    head: [headRow],
+    body: bodyRows,
+    startY: 35,
+    styles: {
+        fontSize: 9,
+        overflow: 'linebreak',
+        cellWidth: 'wrap'
+    },
+    columnStyles: {
+        0: { cellWidth: 50 },
+        [headRow.length - 1]: { halign: 'right' }
+    },
+    margin: { left: 10, right: 10 },
+
+    // ✅ Add this comma and then this block
+    didParseCell: function (data) {
+        if (data.row.index === bodyRows.length - 1) {
+            data.cell.styles.fontStyle = 'bold';
+            data.cell.styles.fillColor = [230, 230, 230]; // light gray
+        }
+    }
+});
+
+    const fileName = `Summary_Report_${filterDate.replace(/-/g, '_')}.pdf`;
+    doc.save(fileName);
+});
+
+    </script>
+</body>
+</html>
