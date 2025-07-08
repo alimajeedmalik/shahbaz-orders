@@ -980,10 +980,18 @@ if (order.paymentMode === 'credit') {
     const orders = JSON.parse(localStorage.getItem('orders') || '[]');
 
     // Filter orders by selected date
-    const selectedOrders = orders.filter(order => {
-        const orderDate = new Date(order.orderDate).toISOString().split('T')[0];
-        return orderDate === filterDate;
-    });
+    function formatDateLocal(dateStr) {
+    const date = new Date(dateStr);
+    return date.getFullYear() + '-' +
+        String(date.getMonth() + 1).padStart(2, '0') + '-' +
+        String(date.getDate()).padStart(2, '0');
+}
+
+const selectedOrders = orders.filter(order => {
+    const orderDate = formatDateLocal(order.orderDate);
+    return orderDate === filterDate;
+});
+
 
     if (selectedOrders.length === 0) {
         alert('No orders found for selected date.');
